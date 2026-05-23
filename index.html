@@ -27,14 +27,16 @@
             top: 0; left: 0; right: 0; pointer-events: none;
         }
         #money { color: #2ea65a; text-shadow: 2px 2px 0 #fff; pointer-events: auto; }
-        #menu-buttons { display: flex; flex-direction: column; gap: 10px; pointer-events: auto; }
+        
+        #menu-buttons { display: flex; flex-direction: column; gap: 10px; pointer-events: auto; align-items: flex-end; }
+        #action-buttons { display: flex; flex-direction: column; gap: 10px; }
 
         .btn {
             background: #ffd3b6; border: 4px solid #ffaa77; border-radius: 12px;
             padding: 8px 15px; font-family: inherit; font-size: 18px; color: #333;
             cursor: pointer; box-shadow: 0 4px 0 #ffaa77; transition: transform 0.1s;
         }
-        .btn:active { transform: translateY(4px); box-shadow: 0 0 0 #ffaa77; }
+        .btn:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
 
         /* --- 3D Environment --- */
         #game-area { flex: 1; position: relative; perspective: 800px; display: flex; flex-direction: column; }
@@ -49,17 +51,19 @@
             box-shadow: inset 0 20px 50px rgba(0,0,0,0.1);
         }
 
-        /* --- Customer Blob --- */
+        /* --- Customer Blob (Scaled down 1.5x) --- */
         .blob {
-            position: absolute; width: 180px; height: 160px; background: #ff8b94;
+            position: absolute; 
+            width: 120px; height: 106px; /* 1.5x smaller */
+            background: #ff8b94;
             border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-            box-shadow: inset -15px -15px 0 rgba(0,0,0,0.1), 0 20px 20px rgba(0,0,0,0.2);
+            box-shadow: inset -10px -10px 0 rgba(0,0,0,0.1), 0 15px 15px rgba(0,0,0,0.2);
             animation: morph 3s linear infinite, float 2s ease-in-out infinite;
-            display: flex; justify-content: center; align-items: center; gap: 20px;
-            bottom: 40px; left: -250px; transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.3s;
+            display: flex; justify-content: center; align-items: center; gap: 13px; /* Smaller gap for eyes */
+            bottom: 40px; left: -200px; transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.3s;
             z-index: 5;
         }
-        .blob.at-counter { left: calc(50% - 90px); }
+        .blob.at-counter { left: calc(50% - 60px); /* Adjusted for new width */ }
         .blob.leaving { left: 110vw; }
         .blob.angry { background-color: #e74c3c !important; animation: shake 0.1s linear infinite !important; }
 
@@ -68,26 +72,26 @@
             34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
             67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
         }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes shake {
             0%, 50%, 100% { transform: translate(0,0); }
             25% { transform: translate(-3px, 2px); }
             75% { transform: translate(3px, -2px); }
         }
-        .eye { width: 20px; height: 25px; background: #333; border-radius: 50%; animation: blink 4s infinite; }
+        .eye { width: 13px; height: 16px; background: #333; border-radius: 50%; animation: blink 4s infinite; }
         @keyframes blink { 0%, 96%, 98%, 100% { transform: scaleY(1); } 97%, 99% { transform: scaleY(0.1); } }
 
-        /* --- The Combo Order Bubble (EXPLODED VIEW) --- */
+        /* --- The Combo Order Bubble (EXPLODED VIEW & Scaled down) --- */
         #order-bubble {
             position: absolute; bottom: 115%; left: 50%; transform: translateX(-50%) scale(0);
-            background: white; padding: 15px 25px; border-radius: 20px; border: 4px solid #333;
-            box-shadow: 0 10px 0 rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 20px;
+            background: white; padding: 10px 15px; border-radius: 15px; border: 3px solid #333;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 10px;
             opacity: 0; transition: all 0.3s ease; z-index: 10;
         }
-        #order-bubble.show { opacity: 1; transform: translateX(-50%) scale(1); }
+        #order-bubble.show { opacity: 1; transform: translateX(-50%) scale(0.7); /* Bubble scales down globally */ }
         #order-bubble::after {
-            content: ''; position: absolute; top: 100%; left: 50%; margin-left: -10px;
-            border-width: 10px; border-style: solid; border-color: #333 transparent transparent transparent;
+            content: ''; position: absolute; top: 100%; left: 50%; margin-left: -8px;
+            border-width: 8px; border-style: solid; border-color: #333 transparent transparent transparent;
         }
         .order-col { display: flex; flex-direction: column-reverse; align-items: center; justify-content: center; gap: 4px; }
 
@@ -117,10 +121,10 @@
             top: -22px; left: 12px; transform: rotate(15deg); border-radius: 3px; border: 1px solid #c0392b;
         }
 
-        /* --- COMBO TRAY (Moved Up & Centered) --- */
+        /* --- COMBO TRAY (Moved Up 1.2x) --- */
         #tray {
             position: absolute; 
-            bottom: 55%; /* MOVED 2X CLOSER TO THE BLOBS */
+            bottom: 66%; /* MOVED UP FROM 55% */
             left: 50%; transform: translateX(-50%);
             width: 280px; height: 45px; background: rgba(255,255,255,0.7);
             border: 5px solid rgba(255,255,255,0.9); border-radius: 20px;
@@ -130,9 +134,11 @@
         .slot { position: relative; width: 80px; height: 10px; }
         .stacked-item { position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none; }
 
-        /* --- Bins --- */
+        /* --- Bins (Moved up 1.4x visually) --- */
         #bins {
-            position: absolute; bottom: 15px; left: 0; width: 100%; display: flex;
+            position: absolute; 
+            bottom: 6vh; /* MOVED UP from the absolute bottom */
+            left: 0; width: 100%; display: flex;
             justify-content: center; gap: 10px; padding: 10px; z-index: 20; flex-wrap: wrap;
         }
         .bin {
@@ -178,8 +184,11 @@
     <div id="hud">
         <div id="money">$0</div>
         <div id="menu-buttons">
-            <button class="btn" onclick="openModal('shop-modal')">SHOP</button>
-            <button class="btn" style="background:#a8e6cf; border-color:#5ca682; box-shadow:0 4px 0 #5ca682;" onclick="openModal('updates-modal')">UPDATES</button>
+            <div id="action-buttons">
+                <button class="btn" onclick="openModal('shop-modal')">SHOP</button>
+                <button class="btn" style="background:#a8e6cf; border-color:#5ca682; box-shadow:0 4px 0 #5ca682;" onclick="openModal('updates-modal')">UPDATES</button>
+            </div>
+            <button class="btn" id="btn-toggle" style="background:#b4a7d6; border-color:#8b7ba8; box-shadow:0 4px 0 #8b7ba8;" onclick="toggleUI()">HIDE UI</button>
         </div>
     </div>
 
@@ -228,8 +237,9 @@
         <div class="modal-box">
             <h2 style="color:#2ea65a;">Updates</h2>
             <div style="text-align: left; font-family: sans-serif; margin-bottom: 20px; line-height: 1.5;">
-                <b>v1.0 May 23 2026</b> Base game.<br>
-         
+                <b>v1.0 May 23 2026:</b> base game.<br>
+                <b>v1.1 May 23 2026:</b> The tray is pushed back closer to the customers, and ingredient bins are moved up slightly. Also a hide ui button was added. <br>
+               
             </div>
             <button class="btn" style="background:#a8e6cf; border-color:#5ca682; box-shadow: 0 4px 0 #5ca682;" onclick="closeModal('updates-modal')">AWESOME</button>
         </div>
@@ -253,6 +263,7 @@
         let currentOrder = { burger: [], side: null, drink: null };
         let activeCustomer = null;
         let customerQueueActive = false;
+        let uiHidden = false;
         
         const blobColors = ['#ff8b94', '#ffaaa5', '#ffd3b6', '#a8e6cf', '#b4a7d6', '#9b59b6', '#3498db'];
 
@@ -286,6 +297,20 @@
         function saveData() { localStorage.setItem('blobBurger_money', money); localStorage.setItem('blobBurger_unlocks', JSON.stringify(unlocks)); }
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        // --- Toggle UI System ---
+        function toggleUI() {
+            uiHidden = !uiHidden;
+            const actionBtns = document.getElementById('action-buttons');
+            const toggleBtn = document.getElementById('btn-toggle');
+            if (uiHidden) {
+                actionBtns.style.display = 'none';
+                toggleBtn.innerText = 'SHOW UI';
+            } else {
+                actionBtns.style.display = 'flex';
+                toggleBtn.innerText = 'HIDE UI';
+            }
+        }
 
         // --- Drag & Drop System ---
         document.querySelectorAll('.bin').forEach(bin => {
@@ -328,8 +353,8 @@
             const mx = e.clientX; const my = e.clientY;
 
             if (dragSource === 'bin') {
-                // Modified drop zone to accommodate the higher tray
-                if (my < window.innerHeight - 100) {
+                // Modified drop zone to accommodate the higher tray and bins
+                if (my < window.innerHeight - 150) {
                     addToTray(draggedType);
                     if (isTutorial) advanceTutorial();
                 }
@@ -340,7 +365,7 @@
                     renderTray();
                 } 
                 // Hand to customer
-                else if (activeCustomer && my < window.innerHeight - 300) {
+                else if (activeCustomer && my < window.innerHeight - 400) {
                     evaluateOrder();
                 }
             }
