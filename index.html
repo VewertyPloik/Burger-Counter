@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Blob Burger 3D - Mobile Fix & Updates</title>
+    <title>Burger Counter</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 
@@ -15,26 +15,23 @@
 
         * { box-sizing: border-box; user-select: none; -webkit-touch-callout: none; }
 
-        /* The iOS Safari fix for viewport height */
-        html {
-            height: -webkit-fill-available;
+        /* Stable full-height fix for all devices */
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
         }
 
         body {
-            margin: 0; padding: 0; width: 100vw; 
-            height: 100vh; height: -webkit-fill-available; /* Fallback for older iOS */
-            overflow: hidden; background-color: #000; 
+            background-color: #000; 
             font-family: var(--primary-font); touch-action: none;
         }
 
         /* --- Game Wrapper (Used for Zooming) --- */
         #game-wrapper {
-            width: 100vw; height: 100%; position: relative;
+            width: 100%; height: 100%; position: relative;
             display: flex; flex-direction: column; overflow: hidden;
             background-color: var(--bg-wall); 
-            transform-origin: center center; transition: transform 0.3s ease;
+            transform-origin: center center; transition: transform 0.2s ease;
         }
-        #game-wrapper.zoomed { transform: scale(0.5); }
 
         /* --- UI & HUD --- */
         #hud {
@@ -159,9 +156,9 @@
         .slot { position: relative; width: 80px; height: 10px; }
         .stacked-item { position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none; }
 
-        /* --- Bins (Fixed for iPhone 7) --- */
+        /* --- Bins --- */
         #bins {
-            position: absolute; bottom: 12%; /* Moved entirely to percentages to keep above iOS Safari bars */
+            position: absolute; bottom: 12%; 
             left: 0; width: 100%; display: flex;
             justify-content: center; gap: 10px; padding: 10px; z-index: 20; flex-wrap: wrap;
         }
@@ -212,7 +209,7 @@
             <div id="action-buttons">
                 <button class="btn" onclick="openModal('shop-modal')">SHOP</button>
                 <button class="btn" style="background:#a8e6cf; border-color:#5ca682; box-shadow:0 4px 0 #5ca682;" onclick="openModal('updates-modal')">UPDATES</button>
-                <button class="btn" id="btn-zoom" style="background:#9ebef0; border-color:#658ccf; box-shadow:0 4px 0 #658ccf;" onclick="toggleZoom()">ZOOM: OFF</button>
+                <button class="btn" id="btn-zoom" style="background:#9ebef0; border-color:#658ccf; box-shadow:0 4px 0 #658ccf;" onclick="cycleZoom()">ZOOM: OFF</button>
                 <button class="btn" id="btn-gfx" style="background:#d9d9d9; border-color:#999; box-shadow:0 4px 0 #999;" onclick="toggleGfx()">SIMPLE GFX: OFF</button>
             </div>
             <button class="btn" id="btn-toggle" style="background:#b4a7d6; border-color:#8b7ba8; box-shadow:0 4px 0 #8b7ba8;" onclick="toggleUI()">HIDE UI</button>
@@ -286,7 +283,7 @@
     let activeCustomer = null;
     let customerQueueActive = false;
     let uiHidden = false;
-    let isZoomed = false;
+    let zoomLevel = 1.0;
     let simpleGfx = false;
     
     const blobColors = ['#ff8b94', '#ffaaa5', '#ffd3b6', '#a8e6cf', '#b4a7d6', '#9b59b6', '#3498db'];
@@ -330,14 +327,24 @@
         document.getElementById('btn-toggle').innerText = uiHidden ? 'SHOW UI' : 'HIDE UI';
     }
 
-    function toggleZoom() {
-        isZoomed = !isZoomed;
-        if(isZoomed) {
-            gameWrapper.classList.add('zoomed');
-            document.getElementById('btn-zoom').innerText = 'ZOOM: ON';
-        } else {
-            gameWrapper.classList.remove('zoomed');
+    function cycleZoom() {
+        zoomLevel -= 0.1;
+        
+        // Due to floating point math (like 0.49999), we check against 0.45
+        if (zoomLevel < 0.45) {
+            zoomLevel = 1.0;
+        }
+        
+        // Clean up the float
+        zoomLevel = Math.round(zoomLevel * 10) / 10;
+        
+        gameWrapper.style.transform = `scale(${zoomLevel})`;
+        
+        if (zoomLevel === 1.0) {
             document.getElementById('btn-zoom').innerText = 'ZOOM: OFF';
+        } else {
+            let displayPercent = Math.round(zoomLevel * 100);
+            document.getElementById('btn-zoom').innerText = `ZOOM: ${displayPercent}%`;
         }
     }
 
@@ -352,13 +359,13 @@
         }
     }
 
-    // --- Drag Coordinate Helper (Crucial for Zooming) ---
+    // --- Drag Coordinate Helper (Crucial for Variable Zooming) ---
     function getMouseCoords(e) {
-        if (!isZoomed) return { x: e.clientX, y: e.clientY };
+        if (zoomLevel === 1.0) return { x: e.clientX, y: e.clientY };
         const rect = gameWrapper.getBoundingClientRect();
         return {
-            x: (e.clientX - rect.left) / 0.5,
-            y: (e.clientY - rect.top) / 0.5
+            x: (e.clientX - rect.left) / zoomLevel,
+            y: (e.clientY - rect.top) / zoomLevel
         };
     }
 
@@ -406,7 +413,7 @@
 
         const coords = getMouseCoords(e);
         const mx = coords.x; const my = coords.y;
-        const unscaledHeight = window.innerHeight;
+        const unscaledHeight = gameWrapper.offsetHeight;
 
         if (dragSource === 'bin') {
             if (my < unscaledHeight - 150) {
@@ -597,11 +604,11 @@
             let endX = tRect.left - wrapperRect.left + 50; 
             let endY = tRect.top - wrapperRect.top + 10;
             if (tutorialStep === 3) { endX = window.innerWidth / 2; endY = window.innerHeight / 2 - 50; }
-            if (isZoomed) { endX /= 0.5; endY /= 0.5; }
+            if (zoomLevel !== 1.0) { endX /= zoomLevel; endY /= zoomLevel; }
 
             let startX = sRect.left - wrapperRect.left + 15;
             let startY = sRect.top - wrapperRect.top + 15;
-            if(isZoomed) { startX /= 0.5; startY /= 0.5; }
+            if (zoomLevel !== 1.0) { startX /= zoomLevel; startY /= zoomLevel; }
 
             hand.style.left = startX + 'px'; hand.style.top = startY + 'px';
             hand.animate([{ left: startX+'px', top: startY+'px' }, { left: endX+'px', top: endY+'px' }], { duration: 1500, iterations: 1 });
