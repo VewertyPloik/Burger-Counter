@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Burger Counter</title>
+    <title>Blob Burger 3D - Mobile Fix & Updates</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 
@@ -15,17 +15,23 @@
 
         * { box-sizing: border-box; user-select: none; -webkit-touch-callout: none; }
 
+        /* The iOS Safari fix for viewport height */
+        html {
+            height: -webkit-fill-available;
+        }
+
         body {
-            margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden;
-            background-color: #000; /* Black background for when zoomed out */
+            margin: 0; padding: 0; width: 100vw; 
+            height: 100vh; height: -webkit-fill-available; /* Fallback for older iOS */
+            overflow: hidden; background-color: #000; 
             font-family: var(--primary-font); touch-action: none;
         }
 
         /* --- Game Wrapper (Used for Zooming) --- */
         #game-wrapper {
-            width: 100vw; height: 100vh; position: relative;
+            width: 100vw; height: 100%; position: relative;
             display: flex; flex-direction: column; overflow: hidden;
-            background-color: var(--bg-wall); /* Fallback */
+            background-color: var(--bg-wall); 
             transform-origin: center center; transition: transform 0.3s ease;
         }
         #game-wrapper.zoomed { transform: scale(0.5); }
@@ -54,7 +60,7 @@
             flex: 1; position: relative; display: flex; justify-content: center; align-items: center;
             background: repeating-linear-gradient(90deg, #fff, #fff 40px, var(--bg-wall) 40px, var(--bg-wall) 80px);
         }
-        #counter { height: 45vh; position: relative; transform-style: preserve-3d; }
+        #counter { height: 45%; position: relative; transform-style: preserve-3d; }
         #counter-top {
             position: absolute; width: 150vw; height: 100%; left: -25vw;
             background: var(--counter-top); transform: rotateX(40deg); transform-origin: top;
@@ -153,9 +159,10 @@
         .slot { position: relative; width: 80px; height: 10px; }
         .stacked-item { position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none; }
 
-        /* --- Bins --- */
+        /* --- Bins (Fixed for iPhone 7) --- */
         #bins {
-            position: absolute; bottom: 6vh; left: 0; width: 100%; display: flex;
+            position: absolute; bottom: 12%; /* Moved entirely to percentages to keep above iOS Safari bars */
+            left: 0; width: 100%; display: flex;
             justify-content: center; gap: 10px; padding: 10px; z-index: 20; flex-wrap: wrap;
         }
         .bin {
@@ -180,7 +187,7 @@
 
         /* --- Modals --- */
         .modal-bg {
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100%;
             background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 4000;
         }
         .modal-box { background: white; padding: 30px; border-radius: 25px; text-align: center; width: 85%; max-width: 400px; }
@@ -190,8 +197,8 @@
         .money-pop { position: absolute; font-size: 42px; text-shadow: 2px 2px 0 #fff; animation: floatUp 1s forwards; pointer-events: none; z-index: 500; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-100px) scale(1.4); } }
 
-        /* --- Tutorial Clean Hand (Now a simple Emoji, NO SVGs) --- */
-        #tutorial-overlay { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1500; pointer-events: none; display: none; }
+        /* --- Tutorial Clean Hand --- */
+        #tutorial-overlay { position: absolute; top: 0; left: 0; width: 100vw; height: 100%; z-index: 1500; pointer-events: none; display: none; }
         #tutorial-text { position: absolute; top: 15%; width: 100%; text-align: center; font-size: 28px; color: #334155; text-shadow: 2px 2px 0 #fff; }
         #tutorial-hand { position: absolute; font-size: 50px; pointer-events: none; z-index: 1600; transition: none; transform: translate(-20px, 10px); }
     </style>
@@ -254,9 +261,10 @@
     <div id="updates-modal" class="modal-bg">
         <div class="modal-box">
             <h2 style="color:#2ea65a;">UPDATES</h2>
-            <div style="text-align: left; font-family: sans-serif; margin-bottom: 20px; line-height: 1.5;">
+            <div style="text-align: left; font-family: sans-serif; margin-bottom: 20px; line-height: 1.5; font-size: 14px;">
                 <b>v1.0 May 23 2026:</b> base game.<br>
-                <b>v1.1 May 23 2026:</b> The tray is pushed back closer to the customers, and ingredient bins are moved up slightly. Also a hide ui button was added. <br>      <b>v1.2 May 23 2026:</b> Added zoom out / in button and simple graphics button! <br>
+                <b>v1.1 May 23 2026:</b> The tray is pushed back closer to the customers, and ingredient bins are moved up slightly. Also a hide ui button was added.<br>
+                <b>v1.2 May 23 2026:</b> Added zoom out / in button and simple graphics button!
             </div>
             <button class="btn" style="background:#a8e6cf; border-color:#5ca682; box-shadow: 0 4px 0 #5ca682;" onclick="closeModal('updates-modal')">AWESOME</button>
         </div>
@@ -398,7 +406,7 @@
 
         const coords = getMouseCoords(e);
         const mx = coords.x; const my = coords.y;
-        const unscaledHeight = window.innerHeight; // The wrapper height is fixed to innerHeight
+        const unscaledHeight = window.innerHeight;
 
         if (dragSource === 'bin') {
             if (my < unscaledHeight - 150) {
@@ -410,7 +418,6 @@
                 trayHistory.pop();
                 renderTray();
             } 
-            // EASIER DROP ZONE: Drop anywhere above the bottom 40% (direct on blobs!)
             else if (activeCustomer && my < unscaledHeight * 0.6) {
                 evaluateOrder();
             }
