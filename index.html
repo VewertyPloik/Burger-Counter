@@ -13,28 +13,34 @@
             --primary-font: 'Fredoka One', cursive;
         }
 
-        * { box-sizing: border-box; user-select: none; -webkit-touch-callout: none; }
+        /* Hardware acceleration for older phones */
+        * { 
+            box-sizing: border-box; user-select: none; -webkit-user-select: none; 
+            -webkit-touch-callout: none; touch-action: none;
+        }
 
         body {
             margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden;
-            font-family: var(--primary-font); touch-action: none; display: flex; flex-direction: column;
+            font-family: var(--primary-font); display: flex; flex-direction: column;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* --- UI & HUD --- */
         #hud {
             display: flex; justify-content: space-between; align-items: flex-start;
-            padding: 15px 20px; font-size: 28px; z-index: 100; position: absolute;
-            top: 0; left: 0; right: 0; pointer-events: none;
+            padding: 15px 20px; font-size: 24px; /* Slightly smaller for iPhone 7 */
+            z-index: 100; position: absolute; top: 0; left: 0; right: 0; pointer-events: none;
         }
         #money { color: #2ea65a; text-shadow: 2px 2px 0 #fff; pointer-events: auto; }
         
-        #menu-buttons { display: flex; flex-direction: column; gap: 10px; pointer-events: auto; align-items: flex-end; }
-        #action-buttons { display: flex; flex-direction: column; gap: 10px; }
+        #menu-buttons { display: flex; flex-direction: column; gap: 8px; pointer-events: auto; align-items: flex-end; }
+        #action-buttons { display: flex; flex-direction: column; gap: 8px; }
 
         .btn {
-            background: #ffd3b6; border: 4px solid #ffaa77; border-radius: 12px;
-            padding: 8px 15px; font-family: inherit; font-size: 18px; color: #333;
+            background: #ffd3b6; border: 3px solid #ffaa77; border-radius: 10px;
+            padding: 8px 12px; font-family: inherit; font-size: 16px; color: #333;
             cursor: pointer; box-shadow: 0 4px 0 #ffaa77; transition: transform 0.1s;
+            -webkit-appearance: none; /* Fix old Safari button styling */
         }
         .btn:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
 
@@ -44,29 +50,34 @@
             flex: 1; position: relative; display: flex; justify-content: center; align-items: center;
             background: repeating-linear-gradient(90deg, #fff, #fff 40px, var(--bg-wall) 40px, var(--bg-wall) 80px);
         }
-        #counter { height: 45vh; position: relative; transform-style: preserve-3d; }
+        #counter { height: 40vh; position: relative; transform-style: preserve-3d; }
         #counter-top {
             position: absolute; width: 150vw; height: 100%; left: -25vw;
             background: var(--counter-top); transform: rotateX(40deg); transform-origin: top;
             box-shadow: inset 0 20px 50px rgba(0,0,0,0.1);
         }
 
-        /* --- Customer Blob (Scaled down 1.5x) --- */
+        /* --- Customer Blob --- */
         .blob {
-            position: absolute; 
-            width: 120px; height: 106px; /* 1.5x smaller */
-            background: #ff8b94;
+            position: absolute; width: 120px; height: 106px; background: #ff8b94;
             border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
             box-shadow: inset -10px -10px 0 rgba(0,0,0,0.1), 0 15px 15px rgba(0,0,0,0.2);
+            -webkit-animation: morph 3s linear infinite, float 2s ease-in-out infinite;
             animation: morph 3s linear infinite, float 2s ease-in-out infinite;
-            display: flex; justify-content: center; align-items: center; gap: 13px; /* Smaller gap for eyes */
-            bottom: 40px; left: -200px; transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.3s;
+            display: flex; justify-content: center; align-items: center; gap: 13px;
+            bottom: 30px; left: -200px; transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.3s;
             z-index: 5;
+            -webkit-transform: translate3d(0,0,0); /* Force GPU rendering */
         }
-        .blob.at-counter { left: calc(50% - 60px); /* Adjusted for new width */ }
+        .blob.at-counter { left: calc(50% - 60px); }
         .blob.leaving { left: 110vw; }
         .blob.angry { background-color: #e74c3c !important; animation: shake 0.1s linear infinite !important; }
 
+        @-webkit-keyframes morph {
+            0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+            67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+        }
         @keyframes morph {
             0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
             34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
@@ -81,19 +92,19 @@
         .eye { width: 13px; height: 16px; background: #333; border-radius: 50%; animation: blink 4s infinite; }
         @keyframes blink { 0%, 96%, 98%, 100% { transform: scaleY(1); } 97%, 99% { transform: scaleY(0.1); } }
 
-        /* --- The Combo Order Bubble (EXPLODED VIEW & Scaled down) --- */
+        /* --- Order Bubble --- */
         #order-bubble {
             position: absolute; bottom: 115%; left: 50%; transform: translateX(-50%) scale(0);
-            background: white; padding: 10px 15px; border-radius: 15px; border: 3px solid #333;
-            box-shadow: 0 8px 0 rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: white; padding: 8px 12px; border-radius: 15px; border: 3px solid #333;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 8px;
             opacity: 0; transition: all 0.3s ease; z-index: 10;
         }
-        #order-bubble.show { opacity: 1; transform: translateX(-50%) scale(0.7); /* Bubble scales down globally */ }
+        #order-bubble.show { opacity: 1; transform: translateX(-50%) scale(0.7); }
         #order-bubble::after {
             content: ''; position: absolute; top: 100%; left: 50%; margin-left: -8px;
             border-width: 8px; border-style: solid; border-color: #333 transparent transparent transparent;
         }
-        .order-col { display: flex; flex-direction: column-reverse; align-items: center; justify-content: center; gap: 4px; }
+        .order-col { display: flex; flex-direction: column-reverse; align-items: center; justify-content: center; margin: 0 2px; }
 
         /* --- BULLETPROOF CSS GRAPHICS --- */
         .ing-bun-bottom { background: #e09641; height: 25px; border-radius: 5px 5px 15px 15px; width: 100px; box-shadow: inset 0 -5px 0 #bc7a32; position: relative;}
@@ -121,42 +132,44 @@
             top: -22px; left: 12px; transform: rotate(15deg); border-radius: 3px; border: 1px solid #c0392b;
         }
 
-        /* --- COMBO TRAY (Moved Up 1.2x) --- */
+        /* --- COMBO TRAY --- */
         #tray {
             position: absolute; 
-            bottom: 66%; /* MOVED UP FROM 55% */
+            bottom: 70%; /* Perfect placement for 4.7" screen */
             left: 50%; transform: translateX(-50%);
-            width: 280px; height: 45px; background: rgba(255,255,255,0.7);
+            width: 260px; height: 40px; background: rgba(255,255,255,0.7);
             border: 5px solid rgba(255,255,255,0.9); border-radius: 20px;
             box-shadow: 0 15px 20px rgba(0,0,0,0.15); display: flex; justify-content: space-around;
-            align-items: flex-end; padding: 0 10px; cursor: grab; touch-action: none;
+            align-items: flex-end; padding: 0 10px; cursor: grab;
+            -webkit-transform: translate3d(-50%, 0, 0); /* Fixes jitter on old Safari */
         }
-        .slot { position: relative; width: 80px; height: 10px; }
+        .slot { position: relative; width: 75px; height: 10px; }
         .stacked-item { position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none; }
 
-        /* --- Bins (Moved up 1.4x visually) --- */
+        /* --- Bins --- */
         #bins {
             position: absolute; 
-            bottom: 6vh; /* MOVED UP from the absolute bottom */
+            bottom: 4vh; 
             left: 0; width: 100%; display: flex;
-            justify-content: center; gap: 10px; padding: 10px; z-index: 20; flex-wrap: wrap;
+            justify-content: center; gap: 8px; padding: 10px; z-index: 20; flex-wrap: wrap;
         }
         .bin {
-            width: 65px; height: 65px; background: white; border-radius: 15px;
-            box-shadow: 0 6px 0 #cbd5e1; display: flex; justify-content: center; align-items: center;
-            cursor: grab; touch-action: none; border: 3px solid #e2e8f0;
+            width: 60px; height: 60px; background: white; border-radius: 12px;
+            box-shadow: 0 5px 0 #cbd5e1; display: flex; justify-content: center; align-items: center;
+            cursor: grab; border: 3px solid #e2e8f0;
         }
-        .bin > div { transform: scale(0.6); pointer-events: none; }
+        .bin > div { transform: scale(0.55); pointer-events: none; }
         .hidden-item { display: none !important; }
 
-        /* --- Drag Ghost --- */
+        /* --- Drag Ghost (Hardware Accelerated) --- */
         #drag-ghost {
-            position: fixed; pointer-events: none; z-index: 3000;
-            transform: translate(-50%, -50%); filter: drop-shadow(0 25px 15px rgba(0,0,0,0.4));
-            display: none;
+            position: fixed; pointer-events: none; z-index: 9999;
+            filter: drop-shadow(0 25px 15px rgba(0,0,0,0.4)); display: none;
+            will-change: transform; /* Critical for older phones */
+            top: 0; left: 0;
         }
         .ghost-tray {
-            width: 280px; height: 45px; background: rgba(255,255,255,0.7);
+            width: 260px; height: 40px; background: rgba(255,255,255,0.7);
             border: 5px solid rgba(255,255,255,0.9); border-radius: 20px;
             display: flex; justify-content: space-around; align-items: flex-end; padding: 0 10px;
         }
@@ -166,17 +179,17 @@
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 4000;
         }
-        .modal-box { background: white; padding: 30px; border-radius: 25px; text-align: center; width: 85%; max-width: 400px; }
-        .shop-item { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; padding: 12px; background: #f8fafc; border-radius: 15px; border: 2px solid #e2e8f0; }
+        .modal-box { background: white; padding: 25px; border-radius: 20px; text-align: center; width: 90%; max-width: 350px; }
+        .shop-item { display: flex; justify-content: space-between; align-items: center; margin: 12px 0; padding: 10px; background: #f8fafc; border-radius: 12px; border: 2px solid #e2e8f0; }
 
         /* --- Effects --- */
-        .money-pop { position: absolute; font-size: 42px; text-shadow: 2px 2px 0 #fff; animation: floatUp 1s forwards; pointer-events: none; z-index: 500; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-100px) scale(1.4); } }
+        .money-pop { position: absolute; font-size: 36px; text-shadow: 2px 2px 0 #fff; animation: floatUp 1s forwards; pointer-events: none; z-index: 500; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-80px) scale(1.4); } }
 
-        /* --- Tutorial Clean Hand --- */
+        /* --- Tutorial Hand --- */
         #tutorial-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1500; pointer-events: none; display: none; }
-        #tutorial-text { position: absolute; top: 15%; width: 100%; text-align: center; font-size: 28px; color: #334155; text-shadow: 2px 2px 0 #fff; }
-        #tutorial-hand { position: absolute; width: 60px; height: 60px; pointer-events: none; z-index: 1600; transition: none; }
+        #tutorial-text { position: absolute; top: 15%; width: 100%; text-align: center; font-size: 24px; color: #334155; text-shadow: 2px 2px 0 #fff; }
+        #tutorial-hand { position: absolute; width: 50px; height: 50px; pointer-events: none; z-index: 1600; transition: none; }
     </style>
 </head>
 <body>
@@ -186,7 +199,6 @@
         <div id="menu-buttons">
             <div id="action-buttons">
                 <button class="btn" onclick="openModal('shop-modal')">SHOP</button>
-                <button class="btn" style="background:#a8e6cf; border-color:#5ca682; box-shadow:0 4px 0 #5ca682;" onclick="openModal('updates-modal')">UPDATES</button>
             </div>
             <button class="btn" id="btn-toggle" style="background:#b4a7d6; border-color:#8b7ba8; box-shadow:0 4px 0 #8b7ba8;" onclick="toggleUI()">HIDE UI</button>
         </div>
@@ -194,7 +206,6 @@
 
     <div id="game-area">
         <div id="customer-zone"></div>
-
         <div id="counter">
             <div id="counter-top">
                 <div id="tray">
@@ -233,18 +244,6 @@
         </div>
     </div>
 
-    <div id="updates-modal" class="modal-bg">
-        <div class="modal-box">
-            <h2 style="color:#2ea65a;">Updates</h2>
-            <div style="text-align: left; font-family: sans-serif; margin-bottom: 20px; line-height: 1.5;">
-                <b>v1.0 May 23 2026:</b> base game.<br>
-                <b>v1.1 May 23 2026:</b> The tray is pushed back closer to the customers, and ingredient bins are moved up slightly. Also a hide ui button was added. <br>
-               
-            </div>
-            <button class="btn" style="background:#a8e6cf; border-color:#5ca682; box-shadow: 0 4px 0 #5ca682;" onclick="closeModal('updates-modal')">AWESOME</button>
-        </div>
-    </div>
-
     <div id="tutorial-overlay">
         <div id="tutorial-text">Build a burger!</div>
         <div id="tutorial-hand">
@@ -255,9 +254,19 @@
     </div>
 
     <script>
-        // --- Core Data ---
-        let money = parseInt(localStorage.getItem('blobBurger_money')) || 0;
-        let unlocks = JSON.parse(localStorage.getItem('blobBurger_unlocks')) || { fries: false, drink: false };
+        // --- Safe Data Loading for Older Safari ---
+        let money = 0;
+        let unlocks = { fries: false, drink: false };
+        let isTutorial = true;
+        
+        try {
+            money = parseInt(localStorage.getItem('blobBurger_money')) || 0;
+            const savedUnlocks = localStorage.getItem('blobBurger_unlocks');
+            if (savedUnlocks) unlocks = JSON.parse(savedUnlocks);
+            if (localStorage.getItem('blobBurger_tutorialDone')) isTutorial = false;
+        } catch (e) {
+            console.log("Local storage restricted, using temporary session data.");
+        }
         
         let trayHistory = []; 
         let currentOrder = { burger: [], side: null, drink: null };
@@ -273,9 +282,6 @@
         let draggedType = '';
         let dragStartX = 0;
         let dragStartY = 0;
-
-        // Tutorial
-        let isTutorial = localStorage.getItem('blobBurger_tutorialDone') ? false : true;
         let tutorialStep = 0; 
         let loopInterval = null;
 
@@ -294,84 +300,106 @@
         if (unlocks.fries) { document.getElementById('shop-fries').style.display = 'none'; document.getElementById('bin-fries').classList.remove('hidden-item'); }
         if (unlocks.drink) { document.getElementById('shop-drink').style.display = 'none'; document.getElementById('bin-drink').classList.remove('hidden-item'); }
 
-        function saveData() { localStorage.setItem('blobBurger_money', money); localStorage.setItem('blobBurger_unlocks', JSON.stringify(unlocks)); }
+        function saveData() { 
+            try {
+                localStorage.setItem('blobBurger_money', money); 
+                localStorage.setItem('blobBurger_unlocks', JSON.stringify(unlocks)); 
+            } catch(e) {}
+        }
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        // --- Toggle UI System ---
         function toggleUI() {
             uiHidden = !uiHidden;
             const actionBtns = document.getElementById('action-buttons');
             const toggleBtn = document.getElementById('btn-toggle');
-            if (uiHidden) {
-                actionBtns.style.display = 'none';
-                toggleBtn.innerText = 'SHOW UI';
-            } else {
-                actionBtns.style.display = 'flex';
-                toggleBtn.innerText = 'HIDE UI';
-            }
+            if (uiHidden) { actionBtns.style.display = 'none'; toggleBtn.innerText = 'SHOW UI'; } 
+            else { actionBtns.style.display = 'flex'; toggleBtn.innerText = 'HIDE UI'; }
         }
 
-        // --- Drag & Drop System ---
-        document.querySelectorAll('.bin').forEach(bin => {
-            bin.addEventListener('pointerdown', (e) => {
-                if (isTutorial && bin.getAttribute('data-type') !== getExpectedTutorialType()) return;
-                isDragging = true; dragSource = 'bin'; draggedType = bin.getAttribute('data-type');
-                
-                ghostEl.innerHTML = `<div class="ing-${draggedType}"></div>`;
-                ghostEl.className = ''; ghostEl.style.display = 'block';
-                updateGhostPos(e.clientX, e.clientY);
-            });
-        });
+        // --- Bulletproof Event Coordinates ---
+        function getEventCoords(e) {
+            if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            if (e.changedTouches && e.changedTouches.length > 0) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+            return { x: e.clientX, y: e.clientY };
+        }
 
-        trayEl.addEventListener('pointerdown', (e) => {
-            if (trayHistory.length === 0) return; 
-            if (isTutorial && tutorialStep < 3) return; 
+        // --- Drag & Drop Handlers ---
+        function handleDragStart(e, source, type) {
+            if (isTutorial && source === 'bin' && type !== getExpectedTutorialType()) return;
+            if (source === 'tray' && (trayHistory.length === 0 || (isTutorial && tutorialStep < 3))) return;
 
-            isDragging = true; dragSource = 'tray';
-            dragStartX = e.clientX; dragStartY = e.clientY;
+            isDragging = true; dragSource = source; draggedType = type;
+            const coords = getEventCoords(e);
+            dragStartX = coords.x; dragStartY = coords.y;
+
+            if (source === 'bin') {
+                ghostEl.innerHTML = `<div class="ing-${type}"></div>`;
+                ghostEl.className = '';
+            } else {
+                ghostEl.innerHTML = trayEl.innerHTML;
+                ghostEl.className = 'ghost-tray';
+                trayEl.style.opacity = '0.2'; 
+            }
             
-            ghostEl.innerHTML = trayEl.innerHTML;
-            ghostEl.className = 'ghost-tray';
-            ghostEl.style.display = 'flex';
-            
-            trayEl.style.opacity = '0.2'; 
-            updateGhostPos(e.clientX, e.clientY);
-        });
+            ghostEl.style.display = 'block';
+            updateGhostPos(coords.x, coords.y);
+        }
 
-        document.addEventListener('pointermove', (e) => {
+        function handleDragMove(e) {
             if (!isDragging) return;
-            updateGhostPos(e.clientX, e.clientY);
-        });
+            const coords = getEventCoords(e);
+            updateGhostPos(coords.x, coords.y);
+        }
 
-        document.addEventListener('pointerup', (e) => {
+        function handleDragEnd(e) {
             if (!isDragging) return;
             isDragging = false;
             ghostEl.style.display = 'none';
             trayEl.style.opacity = '1'; 
 
-            const mx = e.clientX; const my = e.clientY;
+            const coords = getEventCoords(e);
+            const my = coords.y;
 
+            // --- PERCENTAGE BASED DROP ZONES (Works flawlessly on iPhone 7) ---
             if (dragSource === 'bin') {
-                // Modified drop zone to accommodate the higher tray and bins
-                if (my < window.innerHeight - 150) {
+                // If dragged anywhere out of the very bottom area, add to tray
+                if (my < window.innerHeight * 0.8) {
                     addToTray(draggedType);
                     if (isTutorial) advanceTutorial();
                 }
             } else if (dragSource === 'tray') {
-                // If it was just a quick tap/click, remove the last item
-                if (Math.abs(mx - dragStartX) < 10 && Math.abs(my - dragStartY) < 10) {
+                // Quick Tap Undo
+                if (Math.abs(coords.x - dragStartX) < 15 && Math.abs(my - dragStartY) < 15) {
                     trayHistory.pop();
                     renderTray();
                 } 
-                // Hand to customer
-                else if (activeCustomer && my < window.innerHeight - 400) {
+                // Hand to Customer: Just drag up to the top half of the screen
+                else if (activeCustomer && my < window.innerHeight * 0.55) {
                     evaluateOrder();
                 }
             }
+        }
+
+        function updateGhostPos(x, y) {
+            // Using translate3d for buttery smooth dragging on old chips
+            ghostEl.style.transform = `translate3d(${x - ghostEl.offsetWidth/2}px, ${y - ghostEl.offsetHeight/2}px, 0)`;
+        }
+
+        // Attach double events for bulletproof touch & mouse logic
+        document.querySelectorAll('.bin').forEach(bin => {
+            bin.addEventListener('mousedown', (e) => handleDragStart(e, 'bin', bin.getAttribute('data-type')));
+            bin.addEventListener('touchstart', (e) => { e.preventDefault(); handleDragStart(e, 'bin', bin.getAttribute('data-type')); }, {passive: false});
         });
 
-        function updateGhostPos(x, y) { ghostEl.style.left = x + 'px'; ghostEl.style.top = y + 'px'; }
+        trayEl.addEventListener('mousedown', (e) => handleDragStart(e, 'tray', ''));
+        trayEl.addEventListener('touchstart', (e) => { e.preventDefault(); handleDragStart(e, 'tray', ''); }, {passive: false});
+
+        document.addEventListener('mousemove', handleDragMove);
+        document.addEventListener('touchmove', (e) => { if(isDragging) e.preventDefault(); handleDragMove(e); }, {passive: false});
+
+        document.addEventListener('mouseup', handleDragEnd);
+        document.addEventListener('touchend', handleDragEnd);
 
         // --- Combo Tray Logic ---
         function addToTray(type) {
@@ -388,8 +416,9 @@
 
             trayHistory.forEach((type, index) => {
                 let item = document.createElement('div');
-                item.className = `stacked-item ing-${type}`;
+                item.className = 'stacked-item ing-' + type;
                 item.style.zIndex = index;
+                item.style.webkitTransform = 'translateZ(0)'; // Old iOS fix
 
                 if (type === 'fries') {
                     item.style.bottom = '0px';
@@ -398,7 +427,7 @@
                     item.style.bottom = '0px';
                     slotDrink.appendChild(item);
                 } else {
-                    item.style.bottom = `${burgerHeight}px`;
+                    item.style.bottom = burgerHeight + 'px';
                     slotBurger.appendChild(item);
                     if (type === 'bun-bottom' || type === 'patty') burgerHeight += 16;
                     else if (type === 'cheese') burgerHeight += 6;
@@ -415,7 +444,7 @@
 
             const blob = document.createElement('div');
             blob.className = 'blob'; blob.style.backgroundColor = blobColors[Math.floor(Math.random() * blobColors.length)];
-            blob.innerHTML = `<div class="eye"></div><div class="eye"></div>`;
+            blob.innerHTML = '<div class="eye"></div><div class="eye"></div>';
             customerZone.appendChild(blob);
 
             if (isTutorial) {
@@ -434,36 +463,30 @@
                 };
             }
 
-            // Build EXPLODED Order Bubble
             const bubble = document.createElement('div');
             bubble.id = 'order-bubble';
             
-            // Burger Column
             let bCol = document.createElement('div'); bCol.className = 'order-col';
             currentOrder.burger.forEach(t => { 
                 let m = document.createElement('div'); 
-                m.className = `ing-${t}`; 
-                m.style.transform = 'scale(0.6)'; 
+                m.className = 'ing-' + t; 
+                m.style.transform = 'scale(0.6)'; m.style.webkitTransform = 'scale(0.6)';
                 m.style.margin = '2px 0'; 
                 bCol.appendChild(m); 
             });
             bubble.appendChild(bCol);
 
-            // Fries
             if(currentOrder.side) {
                 let sCol = document.createElement('div'); sCol.className = 'order-col';
                 let m = document.createElement('div'); m.className = 'ing-fries'; 
-                m.style.transform = 'scale(0.8)'; 
-                sCol.appendChild(m);
-                bubble.appendChild(sCol);
+                m.style.transform = 'scale(0.8)'; m.style.webkitTransform = 'scale(0.8)';
+                sCol.appendChild(m); bubble.appendChild(sCol);
             }
-            // Drink
             if(currentOrder.drink) {
                 let dCol = document.createElement('div'); dCol.className = 'order-col';
                 let m = document.createElement('div'); m.className = 'ing-drink'; 
-                m.style.transform = 'scale(0.8)'; 
-                dCol.appendChild(m);
-                bubble.appendChild(dCol);
+                m.style.transform = 'scale(0.8)'; m.style.webkitTransform = 'scale(0.8)';
+                dCol.appendChild(m); bubble.appendChild(dCol);
             }
 
             blob.appendChild(bubble);
@@ -510,16 +533,17 @@
             }, 600);
 
             if (isTutorial) {
-                isTutorial = false; localStorage.setItem('blobBurger_tutorialDone', 'true');
+                isTutorial = false; 
+                try { localStorage.setItem('blobBurger_tutorialDone', 'true'); } catch(e){}
                 document.getElementById('tutorial-overlay').style.display = 'none';
                 clearInterval(loopInterval);
             }
         }
 
         function updateMoney(amount, happy) {
-            money += amount; moneyEl.innerText = `$${money}`; saveData();
+            money += amount; moneyEl.innerText = '$' + money; saveData();
             const pop = document.createElement('div'); pop.className = 'money-pop';
-            pop.innerText = `+$${amount}`; pop.style.color = happy ? '#2ea65a' : '#e74c3c';
+            pop.innerText = '+$' + amount; pop.style.color = happy ? '#2ea65a' : '#e74c3c';
             pop.style.left = '50%'; pop.style.top = '35%';
             document.body.appendChild(pop);
             setTimeout(() => pop.remove(), 1000);
@@ -527,9 +551,9 @@
 
         function buyItem(item, cost) {
             if (money >= cost) {
-                money -= cost; moneyEl.innerText = `$${money}`; unlocks[item] = true; saveData();
-                document.getElementById(`shop-${item}`).style.display = 'none';
-                document.getElementById(`bin-${item}`).classList.remove('hidden-item');
+                money -= cost; moneyEl.innerText = '$' + money; unlocks[item] = true; saveData();
+                document.getElementById('shop-' + item).style.display = 'none';
+                document.getElementById('bin-' + item).classList.remove('hidden-item');
                 closeModal('shop-modal');
             }
         }
@@ -556,10 +580,17 @@
                 else if (tutorialStep === 3) sRect = trayEl.getBoundingClientRect();
 
                 let endX = tRect.left + 50; let endY = tRect.top + 10;
-                if (tutorialStep === 3) { endX = window.innerWidth / 2; endY = window.innerHeight / 2 - 50; }
+                if (tutorialStep === 3) { endX = window.innerWidth / 2; endY = window.innerHeight * 0.4; } // Drag up logic for tutorial
 
-                hand.style.left = (sRect.left + 15) + 'px'; hand.style.top = (sRect.top + 15) + 'px';
-                hand.animate([{ left: (sRect.left+15)+'px', top: (sRect.top+15)+'px' }, { left: endX+'px', top: endY+'px' }], { duration: 1500, iterations: 1 });
+                if(hand.animate) {
+                    hand.style.left = (sRect.left + 15) + 'px'; hand.style.top = (sRect.top + 15) + 'px';
+                    hand.animate([{ left: (sRect.left+15)+'px', top: (sRect.top+15)+'px' }, { left: endX+'px', top: endY+'px' }], { duration: 1500, iterations: 1 });
+                } else {
+                    // Fallback for extremely old Safari
+                    hand.style.transition = 'all 1.5s ease';
+                    hand.style.left = (sRect.left + 15) + 'px'; hand.style.top = (sRect.top + 15) + 'px';
+                    setTimeout(() => { hand.style.left = endX + 'px'; hand.style.top = endY + 'px'; }, 50);
+                }
             };
             animateHand(); loopInterval = setInterval(animateHand, 1800);
         }
